@@ -1,0 +1,19 @@
+{
+  // Format with the module-pinned golines (the `tool` directive in go.mod)
+  // instead of gopls' built-in gofmt. `.vscode/golines` wraps `go tool golines`.
+  "go.formatTool": "custom",
+  "go.alternateTools": {
+    "customFormatter": "${workspaceFolder}/.vscode/golines"
+  },
+  "[go]": {
+    "editor.defaultFormatter": "golang.go",
+    "editor.formatOnSave": true,
+    // golines replaces gopls' formatter, which is also what organizes imports,
+    // so run that as a code action first and let golines wrap afterwards.
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    },
+    // Matches --max-len in .vscode/golines.
+    "editor.rulers": [100]
+  }
+}

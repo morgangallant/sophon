@@ -1,0 +1,12 @@
+#!/bin/sh
+# VS Code custom Go formatter.
+#
+# Runs the golines version pinned by this module (see the `tool` directive in
+# go.mod) instead of whatever happens to be on $PATH. Reads Go source on stdin
+# and writes the formatted result to stdout, which is the contract the Go
+# extension's `go.alternateTools.customFormatter` expects.
+#
+# `go -C` keeps us in the module regardless of the directory VS Code spawns us
+# in (it uses the edited file's directory).
+root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+exec go -C "$root" tool golines --max-len=100 "$@"
