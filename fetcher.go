@@ -8,6 +8,7 @@ import (
 	"mime"
 	"net"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -18,7 +19,7 @@ type Resource struct {
 
 	// The final URL of the fetched resource.
 	// For example, if the resource was redirected, this will be the final URL.
-	URL string
+	URL *url.URL
 
 	// If the response was truncated, e.g. was over a size limit,
 	// then this will be true so downstream callers know Content is incomplete.
@@ -111,7 +112,14 @@ func NewDefaultFetcher(userAgent string) *DefaultFetcher {
 }
 
 func (f *DefaultFetcher) Fetch(ctx context.Context, rawURL string) (*Resource, error) {
-	res := &Resource{URL: rawURL}
+	parsedUrl, err := url.Parse(rawURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse URL: %w", err)
+	}
+
+	res := &Resource{
+		URL: parsedUrl,
+	}
 
 	if f.timeout > 0 {
 		var cancel context.CancelFunc
@@ -141,7 +149,7 @@ func (f *DefaultFetcher) Fetch(ctx context.Context, rawURL string) (*Resource, e
 	defer resp.Body.Close()
 
 	// Set the final URL, in case it was redirected
-	res.URL = resp.Request.URL.String()
+	res.URL = resp.Request.URL
 
 	// If we get a non-200 status code, we'll do a best-effort drain of the response body
 	// (something small) in an attempt to re-use the connection.
