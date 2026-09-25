@@ -52,7 +52,10 @@ func normalizeURL(u *url.URL) *url.URL {
 		n.RawPath = cleaned
 	}
 
-	n.RawQuery = n.Query().Encode()
+	// Avoid dropping query patterns that don't parse cleanly (e.g. bad escapes).
+	if q, err := url.ParseQuery(n.RawQuery); err == nil {
+		n.RawQuery = q.Encode()
+	}
 
 	return &n
 }
